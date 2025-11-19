@@ -35,14 +35,14 @@ class DefaultFirebaseOptions {
     }
   }
 
-  // TODO: Replace with actual Firebase configuration from Firebase Console
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'YOUR_WEB_API_KEY',
-    appId: 'YOUR_WEB_APP_ID',
-    messagingSenderId: 'YOUR_MESSAGING_SENDER_ID',
-    projectId: 'soar-wellness-app',
-    authDomain: 'soar-wellness-app.firebaseapp.com',
-    storageBucket: 'soar-wellness-app.appspot.com',
+    apiKey: 'AIzaSyAGipAbe8dsu3daaEFm1yykPd7zafQFX5g',
+    appId: '1:668902912580:web:56b98af710195be991c211',
+    messagingSenderId: '668902912580',
+    projectId: 'soar-14d58',
+    authDomain: 'soar-14d58.firebaseapp.com',
+    storageBucket: 'soar-14d58.firebasestorage.app',
+    measurementId: 'G-42ZTME69CJ',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
