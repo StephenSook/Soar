@@ -2,10 +2,13 @@ import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:audioplayers/audioplayers.dart';
 import 'dart:convert';
+import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:path_provider/path_provider.dart';
 import '../models/mood_entry.dart';
 import '../config/api_config.dart';
+import 'tts_service.dart';
 
 class PodcastService extends ChangeNotifier {
   final AudioPlayer _audioPlayer = AudioPlayer();
@@ -216,29 +219,53 @@ class PodcastService extends ChangeNotifier {
   }
 
   // Call cloud function to generate TTS audio
+  // Option 1: Using Cloud Function (Recommended for Production)
   Future<String?> _generateVoiceFromText(String text) async {
     try {
-      // TODO: Replace with actual Cloud Function URL
-      final url = Uri.parse('${ApiConfig.cloudFunctionsUrl}/generatePodcast');
-
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'text': text,
-          'voice': 'en-US-Neural2-F', // Google Cloud TTS voice
-          'languageCode': 'en-US',
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['audioUrl']; // URL to the generated MP3
+      // Check if Cloud Functions URL is configured
+      if (ApiConfig.cloudFunctionsUrl != 'YOUR_CLOUD_FUNCTIONS_URL_HERE') {
+        // Use Cloud Function approach
+        return await TtsService.generateSpeechViaCloudFunction(
+          text: text,
+          voiceName: 'en-US-Neural2-F',
+          languageCode: 'en-US',
+        );
+      } else {
+        // Fallback to direct API approach (for development/testing)
+        return await _generateVoiceFromTextDirect(text);
       }
-
-      return null;
     } catch (e) {
       debugPrint('Error calling TTS service: $e');
+      return null;
+    }
+  }
+
+  // Option 2: Direct API call (simpler but less secure - good for development)
+  Future<String?> _generateVoiceFromTextDirect(String text) async {
+    try {
+      if (!TtsService.isConfigured) {
+        debugPrint('TTS API key not configured');
+        return null;
+      }
+
+      final audioBytes = await TtsService.generateSpeechDirect(
+        text: text,
+        voiceName: 'en-US-Neural2-F',
+        languageCode: 'en-US',
+        speakingRate: 1.0,
+        pitch: 0.0,
+      );
+
+      if (audioBytes == null) return null;
+
+      // Save to temporary file
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File('${tempDir.path}/podcast_${DateTime.now().millisecondsSinceEpoch}.mp3');
+      await tempFile.writeAsBytes(audioBytes);
+
+      return tempFile.path;
+    } catch (e) {
+      debugPrint('Error generating speech directly: $e');
       return null;
     }
   }
