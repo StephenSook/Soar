@@ -1,6 +1,10 @@
 # SOAR - Your Personal Wellness Companion
 
-> "What if your phone could sense you're overwhelmed… before you even feel it?"
+> "What if your phone
+
+Uploading Screen Recording 2025-11-21 at 12.16.12 PM.mov…
+
+ could sense you're overwhelmed… before you even feel it?"
 
 SOAR is a comprehensive cross-platform mobile app focused on emotional wellness and productivity. Built with Flutter and powered by Firebase, SOAR combines daily mood tracking, AI-driven personalized recommendations, voice podcasts, peer support communities, and intelligent app blocking to help users maintain mental wellness.
 
