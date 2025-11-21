@@ -52,12 +52,21 @@ class TtsService {
         // Decode base64 audio
         return base64.decode(audioContent);
       } else {
-        debugPrint('TTS API Error: ${response.statusCode}');
-        debugPrint('Response: ${response.body}');
+        debugPrint('❌ TTS API Error: ${response.statusCode}');
+        debugPrint('❌ Response: ${response.body}');
+        debugPrint('❌ This might be a CORS issue if running on web!');
         return null;
       }
     } catch (e) {
-      debugPrint('Error generating speech: $e');
+      debugPrint('❌ Error generating speech: $e');
+      debugPrint('❌ Error type: ${e.runtimeType}');
+      if (e.toString().contains('XMLHttpRequest') || 
+          e.toString().contains('CORS') ||
+          e.toString().contains('Access-Control-Allow-Origin')) {
+        debugPrint('🚨 CONFIRMED: This is a CORS issue!');
+        debugPrint('🚨 Google Cloud APIs cannot be called directly from web browsers.');
+        debugPrint('💡 Solution: Use Cloud Functions or test on mobile/desktop instead.');
+      }
       return null;
     }
   }

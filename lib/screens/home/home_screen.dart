@@ -7,6 +7,9 @@ import '../recommendations/recommendations_screen.dart';
 import '../podcast/podcast_screen.dart';
 import '../community/community_screen.dart';
 import '../profile/profile_screen.dart';
+import '../journal/journal_screen.dart';
+import '../meditation/meditation_screen.dart';
+import '../breathing/breathing_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -329,7 +332,12 @@ class _HomeTabState extends State<HomeTab> {
             Icons.self_improvement,
             Colors.purple,
             () {
-              // TODO: Navigate to meditation
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const MeditationScreen(),
+                ),
+              );
             },
           ),
           _buildQuickActionCard(
@@ -337,7 +345,12 @@ class _HomeTabState extends State<HomeTab> {
             Icons.book,
             Colors.blue,
             () {
-              // TODO: Navigate to journal
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const JournalScreen(),
+                ),
+              );
             },
           ),
           _buildQuickActionCard(
@@ -345,7 +358,12 @@ class _HomeTabState extends State<HomeTab> {
             Icons.air,
             Colors.teal,
             () {
-              // TODO: Navigate to breathing exercise
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const BreathingScreen(),
+                ),
+              );
             },
           ),
           _buildQuickActionCard(
@@ -353,8 +371,96 @@ class _HomeTabState extends State<HomeTab> {
             Icons.support_agent,
             Colors.red,
             () {
-              // TODO: Show crisis resources
+              _showCrisisResourcesDialog(context);
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showComingSoonDialog(BuildContext context, String feature) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('$feature Coming Soon! 🚀'),
+        content: Text(
+          'We\'re working hard to bring you $feature. Stay tuned for updates!',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Got it'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showCrisisResourcesDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('🆘 Crisis Resources'),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'If you\'re experiencing a mental health crisis, help is available:',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 16),
+              _buildCrisisResource(
+                '988 Suicide & Crisis Lifeline',
+                '988',
+                'Call or text 988',
+              ),
+              const Divider(),
+              _buildCrisisResource(
+                'Crisis Text Line',
+                'Text HOME to 741741',
+                'Free 24/7 support',
+              ),
+              const Divider(),
+              _buildCrisisResource(
+                'SAMHSA National Helpline',
+                '1-800-662-4357',
+                'Free, confidential, 24/7',
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCrisisResource(String name, String contact, String description) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            name,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            contact,
+            style: const TextStyle(color: Colors.blue, fontSize: 18),
+          ),
+          const SizedBox(height: 2),
+          Text(
+            description,
+            style: const TextStyle(fontSize: 14, color: Colors.grey),
           ),
         ],
       ),

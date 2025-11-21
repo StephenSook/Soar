@@ -118,6 +118,13 @@ class _PodcastScreenState extends State<PodcastScreen> {
   }
 
   Widget _buildPodcastPlayer(PodcastService podcastService) {
+    // Check if in demo mode (script only, no audio)
+    final isDemoMode = podcastService.currentPodcastUrl == 'DEMO_MODE';
+
+    if (isDemoMode) {
+      return _buildDemoModeView(podcastService);
+    }
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.all(24.0),
@@ -317,5 +324,176 @@ class _PodcastScreenState extends State<PodcastScreen> {
       ),
     );
   }
+
+  Widget _buildDemoModeView(PodcastService podcastService) {
+    final script = podcastService.currentScript ?? '';
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Info banner
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: Colors.orange.shade200),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.info_outline, color: Colors.orange.shade700),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Demo Mode',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.orange.shade900,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Voice generation requires Cloud Text-to-Speech API. Reading your personalized script instead!',
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.orange.shade800,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Podcast visualization
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(40),
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Theme.of(context).colorScheme.primary,
+                  Theme.of(context).colorScheme.secondary,
+                ],
+              ),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Column(
+              children: [
+                const Icon(
+                  Icons.article,
+                  size: 80,
+                  color: Colors.white,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  'Your Personalized Message',
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  DateTime.now().toString().substring(0, 10),
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Colors.white70,
+                      ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 32),
+
+          // Script content
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.format_quote,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Your Daily Message',
+                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    script,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          height: 1.6,
+                          fontSize: 16,
+                        ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Enable voice instructions
+          Card(
+            color: Theme.of(context).colorScheme.primaryContainer,
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.mic,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Want Voice Podcasts?',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onPrimaryContainer,
+                            ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'To enable AI voice generation:\n'
+                    '1. Enable Cloud Text-to-Speech API in Google Cloud Console\n'
+                    '2. See TTS_QUICK_START.md for details\n\n'
+                    'Or use Cloud Functions for production (see GOOGLE_CLOUD_SETUP.md)',
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
+
 

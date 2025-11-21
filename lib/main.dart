@@ -11,6 +11,9 @@ import 'services/notification_service.dart';
 import 'services/recommendation_service.dart';
 import 'services/podcast_service.dart';
 import 'services/community_service.dart';
+import 'services/journal_service.dart';
+import 'services/meditation_service.dart';
+import 'services/breathing_service.dart';
 import 'screens/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/home_screen.dart';
@@ -55,6 +58,9 @@ class SoarApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => RecommendationService()),
         ChangeNotifierProvider(create: (_) => PodcastService()),
         ChangeNotifierProvider(create: (_) => CommunityService()),
+        ChangeNotifierProvider(create: (_) => JournalService()),
+        ChangeNotifierProvider(create: (_) => MeditationService()),
+        ChangeNotifierProvider(create: (_) => BreathingService()),
       ],
       child: MaterialApp(
         title: 'SOAR',

@@ -50,6 +50,9 @@ class PodcastService extends ChangeNotifier {
     });
   }
 
+  String? _currentScript;
+  String? get currentScript => _currentScript;
+
   // Generate daily podcast based on user's mood and history
   Future<String?> generateDailyPodcast(MoodEntry? mood, List<MoodEntry> history) async {
     _isGenerating = true;
@@ -58,8 +61,9 @@ class PodcastService extends ChangeNotifier {
     try {
       // Generate script based on mood and history
       final script = _generatePodcastScript(mood, history);
+      _currentScript = script;
 
-      // Call backend cloud function to generate TTS
+      // Try to generate voice audio
       final audioUrl = await _generateVoiceFromText(script);
 
       if (audioUrl != null) {
@@ -67,11 +71,16 @@ class PodcastService extends ChangeNotifier {
         
         // Save podcast record to Firestore
         await _savePodcastRecord(audioUrl, script);
+      } else {
+        // Demo mode: Set a flag that we have a script but no audio
+        // The UI can show the script as text
+        debugPrint('TTS not available, using demo mode with script only');
+        _currentPodcastUrl = 'DEMO_MODE'; // Special flag for demo
       }
 
       _isGenerating = false;
       notifyListeners();
-      return audioUrl;
+      return audioUrl ?? 'DEMO_MODE';
     } catch (e) {
       debugPrint('Error generating podcast: $e');
       _isGenerating = false;
