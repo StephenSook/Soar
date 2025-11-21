@@ -21,7 +21,7 @@ class Recommendation {
   final String? imageUrl;
   final String? actionUrl;
   final Map<String, dynamic> metadata;
-  final double relevanceScore;
+  double relevanceScore; // Changed to mutable for boosting
   final List<String> tags;
 
   Recommendation({

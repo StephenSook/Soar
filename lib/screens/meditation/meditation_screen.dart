@@ -30,8 +30,13 @@ class _MeditationScreenState extends State<MeditationScreen> {
 
   Widget _buildSessionListScreen() {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Meditation'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
+        title: const Text('Meditation', style: TextStyle(color: Colors.black)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -40,6 +45,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
             'Choose Your Practice',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
           ),
           const SizedBox(height: 8),
@@ -84,6 +90,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
 
   Widget _buildSessionCard(MeditationSession session) {
     return Card(
+      color: Colors.grey[100],
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
         leading: Container(
@@ -98,12 +105,18 @@ class _MeditationScreenState extends State<MeditationScreen> {
             color: Theme.of(context).colorScheme.onPrimaryContainer,
           ),
         ),
-        title: Text(session.title),
+        title: Text(
+          session.title,
+          style: const TextStyle(color: Colors.black),
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 4),
-            Text(session.description),
+            Text(
+              session.description,
+              style: const TextStyle(color: Colors.black87),
+            ),
             const SizedBox(height: 4),
             Row(
               children: [
@@ -118,7 +131,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
           ],
         ),
         isThreeLine: true,
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black),
         onTap: () {
           setState(() {
             _selectedSession = session;
@@ -130,16 +143,21 @@ class _MeditationScreenState extends State<MeditationScreen> {
 
   Widget _buildSessionDetailScreen(MeditationSession session) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
             setState(() {
               _selectedSession = null;
             });
           },
         ),
-        title: Text(session.title),
+        title: Text(session.title, style: const TextStyle(color: Colors.black)),
       ),
       body: Column(
         children: [
@@ -168,6 +186,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
                     session.title,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
                     textAlign: TextAlign.center,
                   ),
@@ -181,11 +200,13 @@ class _MeditationScreenState extends State<MeditationScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.timer, size: 20),
+                        const Icon(Icons.timer, size: 20, color: Colors.black87),
                         const SizedBox(width: 8),
                         Text(
                           '${session.durationMinutes} minutes',
-                          style: Theme.of(context).textTheme.titleMedium,
+                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                                color: Colors.black87,
+                              ),
                         ),
                       ],
                     ),
@@ -193,7 +214,9 @@ class _MeditationScreenState extends State<MeditationScreen> {
                   const SizedBox(height: 24),
                   Text(
                     session.description,
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Colors.black87,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
@@ -236,12 +259,17 @@ class _MeditationScreenState extends State<MeditationScreen> {
     final totalSeconds = service.duration.inSeconds % 60;
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: const Icon(Icons.close, color: Colors.black),
           onPressed: () => _confirmExit(service),
         ),
-        title: Text(session.title),
+        title: Text(session.title, style: const TextStyle(color: Colors.black)),
       ),
       body: Center(
         child: Column(
@@ -269,6 +297,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
                         '${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}',
                         style: Theme.of(context).textTheme.displayLarge?.copyWith(
                               fontWeight: FontWeight.bold,
+                              color: Colors.black,
                             ),
                       ),
                       Text(
@@ -285,7 +314,9 @@ class _MeditationScreenState extends State<MeditationScreen> {
             const SizedBox(height: 48),
             Text(
               service.isPaused ? 'Paused' : 'Breathe and relax...',
-              style: Theme.of(context).textTheme.headlineSmall,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    color: Colors.black,
+                  ),
             ),
             const Spacer(),
             // Controls
@@ -333,6 +364,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
     }
 
     return Card(
+      color: Colors.grey[100],
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -349,6 +381,7 @@ class _MeditationScreenState extends State<MeditationScreen> {
                   'Meditation Tips',
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.bold,
+                        color: Colors.black,
                       ),
                 ),
               ],
@@ -359,8 +392,8 @@ class _MeditationScreenState extends State<MeditationScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text('• ', style: TextStyle(fontSize: 18)),
-                      Expanded(child: Text(tip)),
+                      const Text('• ', style: TextStyle(fontSize: 18, color: Colors.black)),
+                      Expanded(child: Text(tip, style: const TextStyle(color: Colors.black87))),
                     ],
                   ),
                 )),

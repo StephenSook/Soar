@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../utils/constants.dart';
+import '../../utils/theme.dart';
+import 'preferences_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -12,207 +14,234 @@ class ProfileScreen extends StatelessWidget {
     final user = authService.currentUserModel;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.settings),
-            onPressed: () {
-              // TODO: Navigate to settings
-            },
-          ),
-        ],
-      ),
+      backgroundColor: AppTheme.backgroundColor,
       body: SingleChildScrollView(
+        padding: const EdgeInsets.all(24),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Profile header
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(24),
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Theme.of(context).colorScheme.primary,
-                    Theme.of(context).colorScheme.secondary,
-                  ],
-                ),
-              ),
-              child: Column(
-                children: [
-                  CircleAvatar(
-                    radius: 50,
-                    backgroundImage: user?.photoUrl != null
-                        ? NetworkImage(user!.photoUrl!)
-                        : null,
-                    child: user?.photoUrl == null
-                        ? const Icon(Icons.person, size: 50)
-                        : null,
+            const SizedBox(height: 48),
+            
+            // Title
+            Text(
+              'Profile',
+              style: Theme.of(context).textTheme.displaySmall,
+            ),
+            const SizedBox(height: 48),
+
+            // Profile info
+            Text(
+              user?.displayName ?? 'User',
+              style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              user?.email ?? '',
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+            const SizedBox(height: 48),
+
+            // Account section
+            Text(
+              'Account',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.textSecondaryColor,
+                    letterSpacing: 1,
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    user?.displayName ?? 'User',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: Colors.white,
-                        ),
+            ),
+            const SizedBox(height: 16),
+            _buildListItem(
+              context,
+              'Edit Profile',
+              () {
+                // TODO: Navigate to edit profile
+              },
+            ),
+            const Divider(height: 1),
+            _buildListItem(
+              context,
+              'My Preferences',
+              () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const PreferencesScreen(),
                   ),
-                  const SizedBox(height: 4),
-                  Text(
-                    user?.email ?? '',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white.withOpacity(0.9),
-                        ),
-                  ),
-                ],
-              ),
+                );
+              },
+            ),
+            const Divider(height: 1),
+            _buildListItem(
+              context,
+              'Blocked Apps',
+              () {
+                // TODO: Navigate to app blocking settings
+              },
             ),
 
-            // Profile sections
-            const SizedBox(height: 24),
-            _buildSection(
-              context,
-              'Account',
-              [
-                _buildListTile(
-                  context,
-                  Icons.edit,
-                  'Edit Profile',
-                  () {
-                    // TODO: Navigate to edit profile
-                  },
-                ),
-                _buildListTile(
-                  context,
-                  Icons.access_time,
-                  'Mood Check-in Time',
-                  () {
-                    // TODO: Navigate to set reminder time
-                  },
-                ),
-                _buildListTile(
-                  context,
-                  Icons.block,
-                  'Blocked Apps',
-                  () {
-                    // TODO: Navigate to app blocking settings
-                  },
-                ),
-              ],
-            ),
-            const Divider(height: 32),
-            _buildSection(
-              context,
+            const SizedBox(height: 48),
+
+            // Preferences section
+            Text(
               'Preferences',
-              [
-                _buildListTile(
-                  context,
-                  Icons.notifications,
-                  'Notifications',
-                  () {
-                    // TODO: Navigate to notifications settings
-                  },
-                ),
-                _buildListTile(
-                  context,
-                  Icons.palette,
-                  'Appearance',
-                  () {
-                    // TODO: Navigate to appearance settings
-                  },
-                ),
-                _buildListTile(
-                  context,
-                  Icons.language,
-                  'Language',
-                  () {
-                    // TODO: Navigate to language settings
-                  },
-                ),
-              ],
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.textSecondaryColor,
+                    letterSpacing: 1,
+                  ),
             ),
-            const Divider(height: 32),
-            _buildSection(
+            const SizedBox(height: 16),
+            _buildListItem(
               context,
-              'Support',
-              [
-                _buildListTile(
-                  context,
-                  Icons.help,
-                  'Help & Support',
-                  () {
-                    // TODO: Navigate to help
-                  },
-                ),
-                _buildListTile(
-                  context,
-                  Icons.privacy_tip,
-                  'Privacy Policy',
-                  () {
-                    // TODO: Open privacy policy
-                  },
-                ),
-                _buildListTile(
-                  context,
-                  Icons.description,
-                  'Terms of Service',
-                  () {
-                    // TODO: Open terms
-                  },
-                ),
-                _buildListTile(
-                  context,
-                  Icons.info,
-                  'About',
-                  () {
-                    _showAboutDialog(context);
-                  },
-                ),
-              ],
+              'Notifications',
+              () {
+                // TODO: Navigate to notifications settings
+              },
             ),
-            const Divider(height: 32),
+            const Divider(height: 1),
+            _buildListItem(
+              context,
+              'Appearance',
+              () {
+                // TODO: Navigate to appearance settings
+              },
+            ),
+            const Divider(height: 1),
+            _buildListItem(
+              context,
+              'Language',
+              () {
+                // TODO: Navigate to language settings
+              },
+            ),
+
+            const SizedBox(height: 48),
+
+            // Support section
+            Text(
+              'Support',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.textSecondaryColor,
+                    letterSpacing: 1,
+                  ),
+            ),
+            const SizedBox(height: 16),
+            _buildListItem(
+              context,
+              'Help & Support',
+              () {
+                // TODO: Navigate to help
+              },
+            ),
+            const Divider(height: 1),
+            _buildListItem(
+              context,
+              'Privacy Policy',
+              () {
+                // TODO: Open privacy policy
+              },
+            ),
+            const Divider(height: 1),
+            _buildListItem(
+              context,
+              'Terms of Service',
+              () {
+                // TODO: Open terms
+              },
+            ),
+            const Divider(height: 1),
+            _buildListItem(
+              context,
+              'About',
+              () {
+                _showAboutDialog(context);
+              },
+            ),
+
+            const SizedBox(height: 48),
 
             // Sign out button
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () async {
-                    final shouldSignOut = await showDialog<bool>(
-                      context: context,
-                      builder: (context) => AlertDialog(
-                        title: const Text('Sign Out'),
-                        content: const Text('Are you sure you want to sign out?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, false),
-                            child: const Text('Cancel'),
-                          ),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context, true),
-                            child: const Text('Sign Out'),
-                          ),
-                        ],
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () async {
+                  final shouldSignOut = await showDialog<bool>(
+                    context: context,
+                    builder: (context) => Dialog(
+                      child: Padding(
+                        padding: const EdgeInsets.all(32),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Sign out?',
+                              style: Theme.of(context).textTheme.headlineMedium,
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Are you sure you want to sign out?',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            const SizedBox(height: 32),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: OutlinedButton(
+                                    onPressed: () => Navigator.pop(context, false),
+                                    child: const Text('Cancel'),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: ElevatedButton(
+                                    onPressed: () => Navigator.pop(context, true),
+                                    child: const Text('Sign Out'),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
-                    );
+                    ),
+                  );
 
-                    if (shouldSignOut == true && context.mounted) {
-                      await authService.signOut();
-                      if (context.mounted) {
-                        Navigator.pushReplacementNamed(context, '/login');
-                      }
+                  if (shouldSignOut == true && context.mounted) {
+                    await authService.signOut();
+                    if (context.mounted) {
+                      Navigator.pushReplacementNamed(context, '/login');
                     }
-                  },
-                  icon: const Icon(Icons.logout),
-                  label: const Text('Sign Out'),
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: Colors.red,
-                    side: const BorderSide(color: Colors.red),
-                  ),
-                ),
+                  }
+                },
+                child: const Text('Sign Out'),
               ),
+            ),
+            const SizedBox(height: 48),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildListItem(
+    BuildContext context,
+    String title,
+    VoidCallback onTap,
+  ) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              title,
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            const Icon(
+              Icons.arrow_forward,
+              size: 18,
+              color: AppTheme.textSecondaryColor,
             ),
           ],
         ),
@@ -220,71 +249,42 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSection(BuildContext context, String title, List<Widget> children) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: Text(
-            title,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  color: Colors.grey,
-                ),
-          ),
-        ),
-        const SizedBox(height: 8),
-        ...children,
-      ],
-    );
-  }
-
-  Widget _buildListTile(
-    BuildContext context,
-    IconData icon,
-    String title,
-    VoidCallback onTap,
-  ) {
-    return ListTile(
-      leading: Icon(icon),
-      title: Text(title),
-      trailing: const Icon(Icons.chevron_right),
-      onTap: onTap,
-    );
-  }
-
   void _showAboutDialog(BuildContext context) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('About SOAR'),
-        content: SingleChildScrollView(
+      builder: (context) => Dialog(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                AppConstants.appTagline,
-                style: const TextStyle(fontStyle: FontStyle.italic),
+                'About SOAR',
+                style: Theme.of(context).textTheme.headlineMedium,
               ),
               const SizedBox(height: 16),
-              Text('Version: ${AppConstants.appVersion}'),
-              const SizedBox(height: 8),
-              const Text(
-                'SOAR is your personal wellness companion, helping you track your mood, '
-                'stay focused, and connect with supportive communities.',
+              Text(
+                AppConstants.appTagline,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Version ${AppConstants.appVersion}',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('Close'),
+                ),
               ),
             ],
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
       ),
     );
   }
 }
-

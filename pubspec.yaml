@@ -17,6 +17,7 @@ dependencies:
   firebase_storage: ^12.0.0
   firebase_messaging: ^15.0.0
   firebase_analytics: ^11.0.0
+  cloud_functions: ^5.0.0
   
   # State Management
   provider: ^6.1.1
@@ -91,6 +92,7 @@ flutter:
     - assets/icons/
     - assets/audio/
     - assets/data/
+    - soar-images/
   
   # Fonts - Note: You'll need to add font files to assets/fonts/
   # fonts:

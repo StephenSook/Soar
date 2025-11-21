@@ -9,11 +9,14 @@ import 'package:path_provider/path_provider.dart';
 import '../models/mood_entry.dart';
 import '../config/api_config.dart';
 import 'tts_service.dart';
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:html' as html show AudioElement;
 
 class PodcastService extends ChangeNotifier {
   final AudioPlayer _audioPlayer = AudioPlayer();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  html.AudioElement? _webAudioPlayer;
 
   AudioPlayer get audioPlayer => _audioPlayer;
 
@@ -33,21 +36,42 @@ class PodcastService extends ChangeNotifier {
   Duration get position => _position;
 
   PodcastService() {
-    // Listen to player state changes
-    _audioPlayer.onPlayerStateChanged.listen((state) {
-      _isPlaying = state == PlayerState.playing;
-      notifyListeners();
-    });
+    if (kIsWeb) {
+      // Initialize web audio player
+      _webAudioPlayer = html.AudioElement();
+      _webAudioPlayer!.onPlay.listen((_) {
+        _isPlaying = true;
+        notifyListeners();
+      });
+      _webAudioPlayer!.onPause.listen((_) {
+        _isPlaying = false;
+        notifyListeners();
+      });
+      _webAudioPlayer!.onDurationChange.listen((_) {
+        _duration = Duration(seconds: _webAudioPlayer!.duration.toInt());
+        notifyListeners();
+      });
+      _webAudioPlayer!.onTimeUpdate.listen((_) {
+        _position = Duration(seconds: _webAudioPlayer!.currentTime.toInt());
+        notifyListeners();
+      });
+    } else {
+      // Listen to player state changes for mobile
+      _audioPlayer.onPlayerStateChanged.listen((state) {
+        _isPlaying = state == PlayerState.playing;
+        notifyListeners();
+      });
 
-    _audioPlayer.onDurationChanged.listen((duration) {
-      _duration = duration;
-      notifyListeners();
-    });
+      _audioPlayer.onDurationChanged.listen((duration) {
+        _duration = duration;
+        notifyListeners();
+      });
 
-    _audioPlayer.onPositionChanged.listen((position) {
-      _position = position;
-      notifyListeners();
-    });
+      _audioPlayer.onPositionChanged.listen((position) {
+        _position = position;
+        notifyListeners();
+      });
+    }
   }
 
   String? _currentScript;
@@ -59,14 +83,29 @@ class PodcastService extends ChangeNotifier {
     notifyListeners();
 
     try {
+      // Check if user is authenticated
+      if (_auth.currentUser == null) {
+        debugPrint('❌ Cannot generate podcast: User not authenticated');
+        _currentPodcastUrl = 'DEMO_MODE';
+        _isGenerating = false;
+        notifyListeners();
+        return 'DEMO_MODE';
+      }
+
+      debugPrint('✅ User authenticated: ${_auth.currentUser?.email}');
+      
       // Generate script based on mood and history
       final script = _generatePodcastScript(mood, history);
       _currentScript = script;
+      
+      debugPrint('📝 Generated script (${script.length} chars)');
+      debugPrint('🎙️ Calling TTS service...');
 
       // Try to generate voice audio
       final audioUrl = await _generateVoiceFromText(script);
 
       if (audioUrl != null) {
+        debugPrint('✅ Successfully generated podcast: $audioUrl');
         _currentPodcastUrl = audioUrl;
         
         // Save podcast record to Firestore
@@ -74,7 +113,7 @@ class PodcastService extends ChangeNotifier {
       } else {
         // Demo mode: Set a flag that we have a script but no audio
         // The UI can show the script as text
-        debugPrint('TTS not available, using demo mode with script only');
+        debugPrint('❌ TTS not available, using demo mode with script only');
         _currentPodcastUrl = 'DEMO_MODE'; // Special flag for demo
       }
 
@@ -231,20 +270,27 @@ class PodcastService extends ChangeNotifier {
   // Option 1: Using Cloud Function (Recommended for Production)
   Future<String?> _generateVoiceFromText(String text) async {
     try {
+      debugPrint('🔧 Cloud Functions URL: ${ApiConfig.cloudFunctionsUrl}');
+      
       // Check if Cloud Functions URL is configured
       if (ApiConfig.cloudFunctionsUrl != 'YOUR_CLOUD_FUNCTIONS_URL_HERE') {
+        debugPrint('☁️ Using Cloud Function approach');
         // Use Cloud Function approach
-        return await TtsService.generateSpeechViaCloudFunction(
+        final result = await TtsService.generateSpeechViaCloudFunction(
           text: text,
           voiceName: 'en-US-Neural2-F',
           languageCode: 'en-US',
         );
+        debugPrint('☁️ Cloud Function result: ${result != null ? "Success" : "Failed"}');
+        return result;
       } else {
+        debugPrint('📱 Using direct API approach');
         // Fallback to direct API approach (for development/testing)
         return await _generateVoiceFromTextDirect(text);
       }
     } catch (e) {
-      debugPrint('Error calling TTS service: $e');
+      debugPrint('❌ Error calling TTS service: $e');
+      debugPrint('❌ Error type: ${e.runtimeType}');
       return null;
     }
   }
@@ -300,30 +346,64 @@ class PodcastService extends ChangeNotifier {
   // Play podcast
   Future<void> playPodcast(String url) async {
     try {
-      await _audioPlayer.play(UrlSource(url));
+      debugPrint('🎵 Attempting to play podcast from: $url');
+      
+      if (kIsWeb && _webAudioPlayer != null) {
+        // Use HTML5 Audio for web
+        debugPrint('🌐 Using HTML5 Audio for web');
+        _webAudioPlayer!.src = url;
+        _webAudioPlayer!.load();
+        _webAudioPlayer!.play();
+        debugPrint('✅ Web audio player started successfully');
+      } else {
+        // Use audioplayers for mobile
+        debugPrint('📱 Using audioplayers for mobile');
+        await _audioPlayer.stop(); // Stop any existing playback
+        await _audioPlayer.play(UrlSource(url));
+        debugPrint('✅ Audio player started successfully');
+      }
     } catch (e) {
-      debugPrint('Error playing podcast: $e');
+      debugPrint('❌ Error playing podcast: $e');
+      debugPrint('❌ Error type: ${e.runtimeType}');
+      debugPrint('❌ Stack trace: ${StackTrace.current}');
     }
   }
 
   // Pause podcast
   Future<void> pause() async {
-    await _audioPlayer.pause();
+    if (kIsWeb && _webAudioPlayer != null) {
+      _webAudioPlayer!.pause();
+    } else {
+      await _audioPlayer.pause();
+    }
   }
 
   // Resume podcast
   Future<void> resume() async {
-    await _audioPlayer.resume();
+    if (kIsWeb && _webAudioPlayer != null) {
+      _webAudioPlayer!.play();
+    } else {
+      await _audioPlayer.resume();
+    }
   }
 
   // Stop podcast
   Future<void> stop() async {
-    await _audioPlayer.stop();
+    if (kIsWeb && _webAudioPlayer != null) {
+      _webAudioPlayer!.pause();
+      _webAudioPlayer!.currentTime = 0;
+    } else {
+      await _audioPlayer.stop();
+    }
   }
 
   // Seek to position
   Future<void> seek(Duration position) async {
-    await _audioPlayer.seek(position);
+    if (kIsWeb && _webAudioPlayer != null) {
+      _webAudioPlayer!.currentTime = position.inSeconds.toDouble();
+    } else {
+      await _audioPlayer.seek(position);
+    }
   }
 
   @override

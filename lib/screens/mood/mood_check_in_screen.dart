@@ -4,6 +4,7 @@ import '../../models/mood_entry.dart';
 import '../../services/mood_service.dart';
 import '../../services/notification_service.dart';
 import '../../utils/constants.dart';
+import '../../utils/theme.dart';
 
 class MoodCheckInScreen extends StatefulWidget {
   const MoodCheckInScreen({super.key});
@@ -45,23 +46,38 @@ class _MoodCheckInScreenState extends State<MoodCheckInScreen> {
       );
 
       if (mounted) {
-        // Show success dialog
         showDialog(
           context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('✅ Check-In Complete!'),
-            content: const Text(
-              'Great job! Your apps are now unlocked. Keep up the good work!',
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.pop(context); // Close dialog
-                  Navigator.pop(context); // Return to home
-                },
-                child: const Text('Done'),
+          builder: (context) => Dialog(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    'Check-in complete',
+                    style: Theme.of(context).textTheme.headlineMedium,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Great job on checking in today',
+                    style: Theme.of(context).textTheme.bodyMedium,
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 32),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.pop(context);
+                      },
+                      child: const Text('Done'),
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         );
       }
@@ -81,8 +97,13 @@ class _MoodCheckInScreenState extends State<MoodCheckInScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       appBar: AppBar(
         title: const Text('Daily Check-In'),
+        leading: IconButton(
+          icon: const Icon(Icons.close),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
@@ -91,59 +112,105 @@ class _MoodCheckInScreenState extends State<MoodCheckInScreen> {
           children: [
             // Title
             Text(
-              'How are you feeling today?',
-              style: Theme.of(context).textTheme.displaySmall,
-              textAlign: TextAlign.center,
+              'How are you feeling?',
+              style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                color: Colors.black,
+              ),
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 48),
 
             // Mood selection
             Text(
-              'Select your mood:',
-              style: Theme.of(context).textTheme.titleLarge,
+              'Select your mood',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: Colors.black,
+              ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 24),
             _buildMoodSelector(),
-            const SizedBox(height: 32),
+            const SizedBox(height: 48),
 
             // Mood rating slider
             if (_selectedMood != null) ...[
               Text(
-                'How intense is this feeling? (1-5)',
-                style: Theme.of(context).textTheme.titleLarge,
+                'Intensity',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Colors.black,
+                ),
               ),
-              const SizedBox(height: 16),
-              Slider(
-                value: _moodRating.toDouble(),
-                min: 1,
-                max: 5,
-                divisions: 4,
-                label: _moodRating.toString(),
-                onChanged: (value) {
-                  setState(() => _moodRating = value.toInt());
-                },
+              const SizedBox(height: 24),
+              Row(
+                children: List.generate(5, (index) {
+                  final rating = index + 1;
+                  final isSelected = _moodRating == rating;
+                  return Expanded(
+                    child: GestureDetector(
+                      onTap: () => setState(() => _moodRating = rating),
+                      child: Container(
+                        height: 48,
+                        margin: EdgeInsets.only(
+                          right: index < 4 ? 8 : 0,
+                        ),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? Colors.grey[300]
+                              : Colors.grey[200],
+                          border: Border.all(
+                            color: isSelected
+                                ? Colors.grey[400]!
+                                : Colors.grey[300]!,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Center(
+                          child: Text(
+                            rating.toString(),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  );
+                }),
               ),
+              const SizedBox(height: 8),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text('Mild', style: Theme.of(context).textTheme.bodySmall),
-                  Text('Intense', style: Theme.of(context).textTheme.bodySmall),
+                  Text(
+                    'Mild',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    'Intense',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.black87,
+                    ),
+                  ),
                 ],
               ),
-              const SizedBox(height: 32),
+              const SizedBox(height: 48),
             ],
 
             // Optional notes
             Text(
-              'Anything you\'d like to note? (Optional)',
-              style: Theme.of(context).textTheme.titleLarge,
+              'Notes (optional)',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: Colors.black,
+              ),
             ),
             const SizedBox(height: 8),
             Text(
               _getRandomPrompt(),
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontStyle: FontStyle.italic,
-                  ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.black87,
+              ),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -152,21 +219,39 @@ class _MoodCheckInScreenState extends State<MoodCheckInScreen> {
               maxLength: 500,
               decoration: const InputDecoration(
                 hintText: 'Write your thoughts here...',
-                border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 32),
 
             // Submit button
-            ElevatedButton(
-              onPressed: _isSubmitting ? null : _submitCheckIn,
-              child: _isSubmitting
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : const Text('Complete Check-In'),
+            SizedBox(
+              height: 50,
+              child: ElevatedButton(
+                onPressed: _isSubmitting ? null : _submitCheckIn,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey[300],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: _isSubmitting
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(Colors.black),
+                        ),
+                      )
+                    : const Text(
+                        'Complete Check-In',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+              ),
             ),
           ],
         ),
@@ -188,10 +273,13 @@ class _MoodCheckInScreenState extends State<MoodCheckInScreen> {
       MoodType.tired,
     ];
 
-    return Wrap(
-      spacing: 12,
-      runSpacing: 12,
-      alignment: WrapAlignment.center,
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      childAspectRatio: 2.5,
+      mainAxisSpacing: 12,
+      crossAxisSpacing: 12,
       children: moods.map((mood) {
         final entry = MoodEntry(
           id: '',
@@ -203,39 +291,31 @@ class _MoodCheckInScreenState extends State<MoodCheckInScreen> {
 
         final isSelected = _selectedMood == mood;
 
-        return InkWell(
+        return GestureDetector(
           onTap: () => setState(() => _selectedMood = mood),
-          borderRadius: BorderRadius.circular(16),
           child: Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
               color: isSelected
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.surface,
-              borderRadius: BorderRadius.circular(16),
+                  ? Colors.grey[300]
+                  : Colors.grey[200],
               border: Border.all(
                 color: isSelected
-                    ? Theme.of(context).colorScheme.primary
-                    : Colors.grey.shade300,
-                width: 2,
+                    ? Colors.grey[400]!
+                    : Colors.grey[300]!,
               ),
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: Column(
-              children: [
-                Text(
-                  entry.moodEmoji,
-                  style: const TextStyle(fontSize: 40),
+            child: Center(
+              child: Text(
+                entry.moodLabel,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Colors.black,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  entry.moodLabel,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: isSelected ? Colors.white : null,
-                    fontWeight: isSelected ? FontWeight.w600 : null,
-                  ),
-                ),
-              ],
+                textAlign: TextAlign.center,
+              ),
             ),
           ),
         );

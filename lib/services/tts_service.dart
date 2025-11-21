@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:cloud_functions/cloud_functions.dart';
 import '../config/api_config.dart';
 
 /// Text-to-Speech Service using Google Cloud TTS API
@@ -82,30 +83,30 @@ class TtsService {
     double pitch = 0.0,
   }) async {
     try {
-      final url = Uri.parse('${ApiConfig.cloudFunctionsUrl}/generatePodcast');
+      // Use Firebase Cloud Functions callable
+      final functions = FirebaseFunctions.instanceFor(region: 'us-central1');
+      final callable = functions.httpsCallable('generatePodcast');
+      
+      final result = await callable.call({
+        'text': text,
+        'voice': voiceName,
+        'languageCode': languageCode,
+        'speakingRate': speakingRate,
+        'pitch': pitch,
+      });
 
-      final response = await http.post(
-        url,
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'text': text,
-          'voice': voiceName,
-          'languageCode': languageCode,
-          'speakingRate': speakingRate,
-          'pitch': pitch,
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        return data['audioUrl']; // URL to the generated MP3 in Cloud Storage
+      if (result.data != null && result.data['audioUrl'] != null) {
+        debugPrint('✅ Podcast generated successfully: ${result.data['audioUrl']}');
+        return result.data['audioUrl'];
       } else {
-        debugPrint('Cloud Function Error: ${response.statusCode}');
-        debugPrint('Response: ${response.body}');
+        debugPrint('❌ Cloud Function returned no audio URL');
         return null;
       }
     } catch (e) {
-      debugPrint('Error calling Cloud Function: $e');
+      debugPrint('❌ Error calling Cloud Function: $e');
+      if (e.toString().contains('UNAUTHENTICATED')) {
+        debugPrint('💡 User needs to be authenticated to generate podcasts');
+      }
       return null;
     }
   }

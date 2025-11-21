@@ -1,13 +1,16 @@
 import 'package:flutter/foundation.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:google_sign_in/google_sign_in.dart';
 import '../models/user_model.dart';
+
+// Conditionally import google_sign_in only for non-web platforms
+import 'package:google_sign_in/google_sign_in.dart'
+    if (dart.library.html) '../utils/google_sign_in_stub.dart';
 
 class AuthService extends ChangeNotifier {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final GoogleSignIn _googleSignIn = GoogleSignIn();
+  GoogleSignIn? _googleSignIn;
 
   User? get currentUser => _auth.currentUser;
   bool get isAuthenticated => currentUser != null;
@@ -16,6 +19,12 @@ class AuthService extends ChangeNotifier {
   UserModel? get currentUserModel => _currentUserModel;
 
   AuthService() {
+    // Initialize GoogleSignIn only for non-web platforms
+    if (!kIsWeb) {
+      _googleSignIn = GoogleSignIn(
+        scopes: ['email'],
+      );
+    }
     _auth.authStateChanges().listen(_onAuthStateChanged);
   }
 
@@ -81,7 +90,24 @@ class AuthService extends ChangeNotifier {
   // Google Sign In
   Future<UserCredential?> signInWithGoogle() async {
     try {
-      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      // For web, use popup-based sign-in
+      if (kIsWeb) {
+        final GoogleAuthProvider googleProvider = GoogleAuthProvider();
+        final userCredential = await _auth.signInWithPopup(googleProvider);
+        
+        if (userCredential.user != null) {
+          await _createUserDocument(userCredential.user!);
+        }
+        
+        return userCredential;
+      }
+      
+      // For mobile platforms
+      if (_googleSignIn == null) {
+        throw Exception('Google Sign In not available on this platform');
+      }
+      
+      final GoogleSignInAccount? googleUser = await _googleSignIn!.signIn();
       if (googleUser == null) return null;
 
       final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
@@ -164,7 +190,13 @@ class AuthService extends ChangeNotifier {
 
   // Sign Out
   Future<void> signOut() async {
-    await _googleSignIn.signOut();
+    if (_googleSignIn != null && !kIsWeb) {
+      try {
+        await _googleSignIn!.signOut();
+      } catch (e) {
+        debugPrint('Google sign out error: $e');
+      }
+    }
     await _auth.signOut();
     _currentUserModel = null;
     notifyListeners();

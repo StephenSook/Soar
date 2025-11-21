@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../utils/constants.dart';
+import '../../utils/theme.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -15,34 +16,24 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   final List<OnboardingPage> _pages = [
     OnboardingPage(
-      title: 'Track Your Mood Daily',
-      description: 'Check in with yourself every day. Understanding your emotions is the first step to wellness.',
-      icon: Icons.mood,
-      color: const Color(0xFF6B4EFF),
+      title: 'Welcome to Your Wellness Journey',
+      description: 'A safe space to track your emotions and grow stronger every day.',
+      imagePath: 'soar-images/lakeside-pic.jpg',
     ),
     OnboardingPage(
-      title: 'Stay Focused',
-      description: 'Lock distracting apps until you complete your daily check-in. Build healthy habits.',
-      icon: Icons.phone_locked,
-      color: const Color(0xFF4ECAFF),
+      title: 'Track Your Mood Daily',
+      description: 'Check in with yourself every day. Understanding your emotions is the first step.',
+      imagePath: 'soar-images/beach.jpg',
     ),
     OnboardingPage(
       title: 'Personalized Recommendations',
-      description: 'Get curated content, from movies to therapists, tailored to your mood and needs.',
-      icon: Icons.recommend,
-      color: const Color(0xFFFF6B9D),
+      description: 'Get curated content tailored to your mood and needs.',
+      imagePath: 'soar-images/landscape1.jpg',
     ),
     OnboardingPage(
       title: 'Daily Wellness Podcast',
-      description: 'Listen to AI-generated podcasts created just for you, based on your emotional journey.',
-      icon: Icons.headset,
-      color: const Color(0xFF00B894),
-    ),
-    OnboardingPage(
-      title: 'Connect with Community',
-      description: 'Join supportive peer groups. You\'re not alone on this journey.',
-      icon: Icons.people,
-      color: const Color(0xFFFDCB6E),
+      description: 'Listen to personalized podcasts created just for you.',
+      imagePath: 'soar-images/landscape2.jpg',
     ),
   ];
 
@@ -70,18 +61,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.backgroundColor,
       body: SafeArea(
         child: Column(
           children: [
             // Skip button
             Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Align(
-                alignment: Alignment.topRight,
-                child: TextButton(
-                  onPressed: _completeOnboarding,
-                  child: const Text('Skip'),
-                ),
+              padding: const EdgeInsets.all(24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'SOAR',
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.w300,
+                      color: AppTheme.textPrimaryColor,
+                      letterSpacing: 2,
+                    ),
+                  ),
+                  TextButton(
+                    onPressed: _completeOnboarding,
+                    child: const Text('Skip'),
+                  ),
+                ],
               ),
             ),
 
@@ -99,7 +102,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
             // Page indicators
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 24.0),
+              padding: const EdgeInsets.symmetric(vertical: 32),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(
@@ -111,24 +114,41 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
             // Next/Get Started button
             Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_currentPage < _pages.length - 1) {
-                      _pageController.nextPage(
-                        duration: const Duration(milliseconds: 300),
-                        curve: Curves.easeInOut,
-                      );
-                    } else {
-                      _completeOnboarding();
-                    }
-                  },
-                  child: Text(
-                    _currentPage < _pages.length - 1 ? 'Next' : 'Get Started',
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
+              child: Row(
+                children: [
+                  if (_currentPage > 0)
+                    Expanded(
+                      child: OutlinedButton(
+                        onPressed: () {
+                          _pageController.previousPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        },
+                        child: const Text('Back'),
+                      ),
+                    ),
+                  if (_currentPage > 0) const SizedBox(width: 16),
+                  Expanded(
+                    flex: 2,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        if (_currentPage < _pages.length - 1) {
+                          _pageController.nextPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        } else {
+                          _completeOnboarding();
+                        }
+                      },
+                      child: Text(
+                        _currentPage < _pages.length - 1 ? 'Next' : 'Get Started',
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
           ],
@@ -138,35 +158,68 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 
   Widget _buildPage(OnboardingPage page) {
-    return Padding(
-      padding: const EdgeInsets.all(40.0),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          const SizedBox(height: 32),
+          // Image with rounded corners and shadow
           Container(
-            padding: const EdgeInsets.all(32),
+            height: 350,
             decoration: BoxDecoration(
-              color: page.color.withOpacity(0.1),
-              shape: BoxShape.circle,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
             ),
-            child: Icon(
-              page.icon,
-              size: 100,
-              color: page.color,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.asset(
+                page.imagePath,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: AppTheme.cardColor,
+                    child: Center(
+                      child: Icon(
+                        Icons.image_outlined,
+                        size: 64,
+                        color: AppTheme.textPrimaryColor.withOpacity(0.3),
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
           const SizedBox(height: 48),
+          
+          // Title
           Text(
             page.title,
-            style: Theme.of(context).textTheme.displaySmall,
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
+          
+          // Description
           Text(
             page.description,
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: AppTheme.textPrimaryColor.withOpacity(0.8),
+              height: 1.5,
+            ),
             textAlign: TextAlign.center,
           ),
+          const SizedBox(height: 32),
         ],
       ),
     );
@@ -174,14 +227,14 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   Widget _buildIndicator(bool isActive) {
     return AnimatedContainer(
-      duration: const Duration(milliseconds: 150),
-      margin: const EdgeInsets.symmetric(horizontal: 4.0),
-      height: 8.0,
-      width: isActive ? 24.0 : 8.0,
+      duration: const Duration(milliseconds: 300),
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      height: 8,
+      width: isActive ? 32 : 8,
       decoration: BoxDecoration(
-        color: isActive
-            ? Theme.of(context).colorScheme.primary
-            : Theme.of(context).colorScheme.primary.withOpacity(0.3),
+        color: isActive 
+            ? AppTheme.textPrimaryColor 
+            : AppTheme.dividerColor,
         borderRadius: BorderRadius.circular(4),
       ),
     );
@@ -191,14 +244,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 class OnboardingPage {
   final String title;
   final String description;
-  final IconData icon;
-  final Color color;
+  final String imagePath;
 
   OnboardingPage({
     required this.title,
     required this.description,
-    required this.icon,
-    required this.color,
+    required this.imagePath,
   });
 }
-

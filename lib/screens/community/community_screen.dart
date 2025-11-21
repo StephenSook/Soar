@@ -38,10 +38,15 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: const Text('Community'),
         bottom: TabBar(
           controller: _tabController,
+          labelColor: Theme.of(context).colorScheme.primary,
+          unselectedLabelColor: Colors.grey[600],
+          indicatorColor: Theme.of(context).colorScheme.primary,
           tabs: const [
             Tab(text: 'My Groups'),
             Tab(text: 'Discover'),
@@ -89,6 +94,10 @@ class _CommunityScreenState extends State<CommunityScreen> with SingleTickerProv
                 onPressed: () {
                   _tabController.animateTo(1);
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey[300],
+                  foregroundColor: Colors.black,
+                ),
                 child: const Text('Discover Groups'),
               ),
             ],

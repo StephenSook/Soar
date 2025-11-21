@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../services/auth_service.dart';
 import '../../services/mood_service.dart';
+import '../../utils/theme.dart';
+import '../../utils/top_navigation.dart';
 import '../mood/mood_check_in_screen.dart';
 import '../recommendations/recommendations_screen.dart';
 import '../podcast/podcast_screen.dart';
@@ -40,8 +42,7 @@ class _HomeScreenState extends State<HomeScreen> {
     await moodService.checkTodaysCheckIn();
 
     if (!moodService.hasCheckedInToday && mounted) {
-      // Show mood check-in prompt
-      Future.delayed(const Duration(seconds: 1), () {
+      Future.delayed(const Duration(milliseconds: 800), () {
         if (mounted) {
           _showMoodCheckInPrompt();
         }
@@ -53,25 +54,65 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Daily Check-In'),
-        content: const Text(
-          'Time to check in with yourself! Your selected apps will remain locked until you complete your mood check-in.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const MoodCheckInScreen(),
+      builder: (context) => Dialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        child: Padding(
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Daily Check-In',
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                      color: AppTheme.textPrimaryColor,
+                    ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Time to check in with yourself.',
+                textAlign: TextAlign.center,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.textPrimaryColor,
+                    ),
+              ),
+              const SizedBox(height: 32),
+              SizedBox(
+                width: double.infinity,
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MoodCheckInScreen(),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.grey[300],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Check In Now',
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-              );
-            },
-            child: const Text('Check In Now'),
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Later'),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -79,40 +120,20 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _selectedIndex,
-        children: _screens,
-      ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _selectedIndex,
-        onDestinationSelected: (index) {
-          setState(() => _selectedIndex = index);
-        },
-        destinations: const [
-          NavigationDestination(
-            icon: Icon(Icons.home_outlined),
-            selectedIcon: Icon(Icons.home),
-            label: 'Home',
+      backgroundColor: AppTheme.backgroundColor,
+      body: Column(
+        children: [
+          TopNavigation(
+            currentIndex: _selectedIndex,
+            onItemSelected: (index) {
+              setState(() => _selectedIndex = index);
+            },
           ),
-          NavigationDestination(
-            icon: Icon(Icons.explore_outlined),
-            selectedIcon: Icon(Icons.explore),
-            label: 'Explore',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.headset_outlined),
-            selectedIcon: Icon(Icons.headset),
-            label: 'Podcast',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.people_outlined),
-            selectedIcon: Icon(Icons.people),
-            label: 'Community',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.person_outlined),
-            selectedIcon: Icon(Icons.person),
-            label: 'Profile',
+          Expanded(
+            child: IndexedStack(
+              index: _selectedIndex,
+              children: _screens,
+            ),
           ),
         ],
       ),
@@ -145,192 +166,272 @@ class _HomeTabState extends State<HomeTab> {
     final moodService = context.watch<MoodService>();
     final user = authService.currentUserModel;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Hello, ${user?.displayName ?? "there"}! 👋',
-          style: Theme.of(context).textTheme.headlineMedium,
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_outlined),
-            onPressed: () {
-              // TODO: Show notifications
-            },
-          ),
-        ],
-      ),
-      body: RefreshIndicator(
-        onRefresh: _loadData,
-        child: SingleChildScrollView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Mood check-in status card
-              Card(
-                margin: const EdgeInsets.all(16),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+    return RefreshIndicator(
+      onRefresh: _loadData,
+      color: AppTheme.primaryColor,
+      child: CustomScrollView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        slivers: [
+          // Hero image section - minimal and prominent
+          SliverToBoxAdapter(
+            child: Container(
+              height: 400,
+              margin: const EdgeInsets.all(24),
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(0),
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.asset(
+                      'soar-images/lakeside-pic.jpg',
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          color: AppTheme.cardColor,
+                        );
+                      },
+                    ),
+                    // Minimal gradient overlay
+                    Container(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [
+                            Colors.transparent,
+                            Colors.black.withOpacity(0.3),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // Minimal text overlay
+                    Positioned(
+                      bottom: 32,
+                      left: 32,
+                      right: 32,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Icon(
-                            moodService.hasCheckedInToday
-                                ? Icons.check_circle
-                                : Icons.pending,
-                            color: moodService.hasCheckedInToday
-                                ? Colors.green
-                                : Colors.orange,
-                            size: 32,
-                          ),
-                          const SizedBox(width: 16),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  moodService.hasCheckedInToday
-                                      ? 'Check-in Complete! ✨'
-                                      : 'Ready to Check In?',
-                                  style: Theme.of(context).textTheme.titleLarge,
+                          Text(
+                            'Hello, ${user?.displayName ?? "there"}',
+                            style: const TextStyle(
+                              fontSize: 36,
+                              fontWeight: FontWeight.w300,
+                              color: Colors.white,
+                              letterSpacing: -0.5,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black45,
+                                  blurRadius: 8,
                                 ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  moodService.hasCheckedInToday
-                                      ? 'You\'re doing great!'
-                                      : 'Take a moment for yourself',
-                                  style: Theme.of(context).textTheme.bodyMedium,
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _getGreetingMessage(),
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w400,
+                              color: Colors.white,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black45,
+                                  blurRadius: 8,
                                 ),
                               ],
                             ),
                           ),
                         ],
                       ),
-                      if (!moodService.hasCheckedInToday) ...[
-                        const SizedBox(height: 16),
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const MoodCheckInScreen(),
-                                ),
-                              );
-                            },
-                            child: const Text('Check In Now'),
-                          ),
-                        ),
-                      ],
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
-
-              // Mood streak card
-              if (moodService.moodHistory.isNotEmpty) ...[
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    'Your Progress',
-                    style: Theme.of(context).textTheme.titleLarge,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: _buildMoodStats(moodService),
-                  ),
-                ),
-              ],
-
-              const SizedBox(height: 24),
-
-              // Quick actions
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  'Quick Actions',
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _buildQuickActions(),
-
-              const SizedBox(height: 24),
-            ],
+            ),
           ),
-        ),
+
+          // Content
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            sliver: SliverList(
+              delegate: SliverChildListDelegate([
+                const SizedBox(height: 16),
+
+                // Mood check-in card - minimal
+                _buildMoodCheckInCard(moodService),
+
+                // Mood stats
+                if (moodService.moodHistory.isNotEmpty) ...[
+                  const SizedBox(height: 48),
+                  Text(
+                    'Your Progress',
+                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                          color: AppTheme.textPrimaryColor,
+                        ),
+                  ),
+                  const SizedBox(height: 24),
+                  _buildMoodStatsCard(moodService),
+                ],
+
+                const SizedBox(height: 48),
+
+                // Wellness tools section
+                Text(
+                  'Wellness Tools',
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        color: AppTheme.textPrimaryColor,
+                      ),
+                ),
+                const SizedBox(height: 24),
+                _buildWellnessTools(),
+
+                const SizedBox(height: 48),
+
+                // Daily inspiration with image - minimal
+                _buildInspirationSection(),
+
+                const SizedBox(height: 64),
+              ]),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildMoodStats(MoodService moodService) {
-    final stats = moodService.getMoodStatistics();
-    
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildStatItem(
-              '${stats['streak']}',
-              'Day Streak',
-              Icons.local_fire_department,
-              Colors.orange,
-            ),
-            _buildStatItem(
-              '${stats['totalEntries']}',
-              'Check-ins',
-              Icons.check_circle,
-              Colors.green,
-            ),
-            _buildStatItem(
-              '${(stats['averageRating'] as double).toStringAsFixed(1)}',
-              'Avg Mood',
-              Icons.mood,
-              Colors.blue,
+  String _getGreetingMessage() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) {
+      return 'Good morning';
+    } else if (hour < 17) {
+      return 'Good afternoon';
+    } else {
+      return 'Good evening';
+    }
+  }
+
+  Widget _buildMoodCheckInCard(MoodService moodService) {
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: moodService.hasCheckedInToday
+            ? AppTheme.cardColor
+            : AppTheme.surfaceColor,
+        border: Border.all(
+          color: AppTheme.dividerColor,
+          width: 1,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            moodService.hasCheckedInToday
+                ? 'All set for today'
+                : 'Ready to check in?',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: AppTheme.textPrimaryColor,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            moodService.hasCheckedInToday
+                ? 'You\'ve completed your daily check-in'
+                : 'Take a moment for yourself',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: AppTheme.textPrimaryColor,
+                ),
+          ),
+          if (!moodService.hasCheckedInToday) ...[
+            const SizedBox(height: 24),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const MoodCheckInScreen(),
+                  ),
+                );
+              },
+              child: const Text('Check In Now'),
             ),
           ],
-        ),
-      ],
+        ],
+      ),
     );
   }
 
-  Widget _buildStatItem(String value, String label, IconData icon, Color color) {
+  Widget _buildMoodStatsCard(MoodService moodService) {
+    final stats = moodService.getMoodStatistics();
+
+    return Container(
+      padding: const EdgeInsets.all(32),
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceColor,
+        border: Border.all(
+          color: AppTheme.dividerColor,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildStatItem(
+            '${stats['streak']}',
+            'Day Streak',
+          ),
+          Container(
+            height: 40,
+            width: 1,
+            color: AppTheme.dividerColor,
+          ),
+          _buildStatItem(
+            '${stats['totalEntries']}',
+            'Check-ins',
+          ),
+          Container(
+            height: 40,
+            width: 1,
+            color: AppTheme.dividerColor,
+          ),
+          _buildStatItem(
+            '${(stats['averageRating'] as double).toStringAsFixed(1)}',
+            'Avg Mood',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatItem(String value, String label) {
     return Column(
       children: [
-        Icon(icon, color: color, size: 32),
-        const SizedBox(height: 8),
         Text(
           value,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
+          style: const TextStyle(
+            fontSize: 32,
+            fontWeight: FontWeight.w300,
+            color: AppTheme.textPrimaryColor,
+          ),
         ),
+        const SizedBox(height: 8),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodySmall,
+          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppTheme.textPrimaryColor,
+              ),
         ),
       ],
     );
   }
 
-  Widget _buildQuickActions() {
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Row(
-        children: [
-          _buildQuickActionCard(
+  Widget _buildWellnessTools() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildToolCard(
             'Meditation',
-            Icons.self_improvement,
-            Colors.purple,
             () {
               Navigator.push(
                 context,
@@ -340,10 +441,11 @@ class _HomeTabState extends State<HomeTab> {
               );
             },
           ),
-          _buildQuickActionCard(
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildToolCard(
             'Journal',
-            Icons.book,
-            Colors.blue,
             () {
               Navigator.push(
                 context,
@@ -353,10 +455,11 @@ class _HomeTabState extends State<HomeTab> {
               );
             },
           ),
-          _buildQuickActionCard(
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildToolCard(
             'Breathe',
-            Icons.air,
-            Colors.teal,
             () {
               Navigator.push(
                 context,
@@ -366,142 +469,114 @@ class _HomeTabState extends State<HomeTab> {
               );
             },
           ),
-          _buildQuickActionCard(
-            'Crisis Help',
-            Icons.support_agent,
-            Colors.red,
-            () {
-              _showCrisisResourcesDialog(context);
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showComingSoonDialog(BuildContext context, String feature) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('$feature Coming Soon! 🚀'),
-        content: Text(
-          'We\'re working hard to bring you $feature. Stay tuned for updates!',
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Got it'),
-          ),
-        ],
-      ),
+      ],
     );
   }
 
-  void _showCrisisResourcesDialog(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('🆘 Crisis Resources'),
-        content: SingleChildScrollView(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'If you\'re experiencing a mental health crisis, help is available:',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-              _buildCrisisResource(
-                '988 Suicide & Crisis Lifeline',
-                '988',
-                'Call or text 988',
-              ),
-              const Divider(),
-              _buildCrisisResource(
-                'Crisis Text Line',
-                'Text HOME to 741741',
-                'Free 24/7 support',
-              ),
-              const Divider(),
-              _buildCrisisResource(
-                'SAMHSA National Helpline',
-                '1-800-662-4357',
-                'Free, confidential, 24/7',
-              ),
-            ],
+  Widget _buildToolCard(String title, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: AppTheme.surfaceColor,
+          border: Border.all(
+            color: AppTheme.dividerColor,
+            width: 1,
           ),
         ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
-          ),
-        ],
+        child: Text(
+          title,
+          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                color: AppTheme.textPrimaryColor,
+              ),
+          textAlign: TextAlign.center,
+        ),
       ),
     );
   }
 
-  Widget _buildCrisisResource(String name, String contact, String description) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            name,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            contact,
-            style: const TextStyle(color: Colors.blue, fontSize: 18),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            description,
-            style: const TextStyle(fontSize: 14, color: Colors.grey),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget _buildInspirationSection() {
+    final inspirations = [
+      {
+        'image': 'soar-images/beach.jpg',
+        'quote': 'Take a deep breath.',
+      },
+      {
+        'image': 'soar-images/landscape1.jpg',
+        'quote': 'Progress, not perfection.',
+      },
+      {
+        'image': 'soar-images/landscape2.jpg',
+        'quote': 'Your mental health matters.',
+      },
+    ];
 
-  Widget _buildQuickActionCard(
-    String title,
-    IconData icon,
-    Color color,
-    VoidCallback onTap,
-  ) {
-    return Card(
-      margin: const EdgeInsets.all(4),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          width: 120,
-          padding: const EdgeInsets.all(16),
-          child: Column(
+    final inspiration = inspirations[DateTime.now().day % inspirations.length];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Daily Inspiration',
+          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                color: AppTheme.textPrimaryColor,
+              ),
+        ),
+        const SizedBox(height: 24),
+        SizedBox(
+          height: 500,
+          child: Stack(
             children: [
+              Image.asset(
+                inspiration['image'] as String,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: AppTheme.cardColor,
+                  );
+                },
+              ),
+              // Dark overlay for better text readability
               Container(
-                padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [
+                      Colors.transparent,
+                      Colors.black.withOpacity(0.4),
+                    ],
+                  ),
                 ),
-                child: Icon(icon, color: color, size: 32),
               ),
-              const SizedBox(height: 12),
-              Text(
-                title,
-                style: Theme.of(context).textTheme.bodyMedium,
-                textAlign: TextAlign.center,
+              Positioned(
+                bottom: 32,
+                left: 32,
+                right: 32,
+                child: Text(
+                  inspiration['quote'] as String,
+                  style: const TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w300,
+                    color: Colors.white,
+                    height: 1.4,
+                    shadows: [
+                      Shadow(
+                        color: Colors.black45,
+                        blurRadius: 8,
+                      ),
+                    ],
+                  ),
+                ),
               ),
             ],
           ),
         ),
-      ),
+      ],
     );
   }
 }
-

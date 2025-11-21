@@ -35,12 +35,18 @@ class _JournalScreenState extends State<JournalScreen> {
         : journalService.searchEntries(_searchQuery);
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Journal'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
+        title: const Text('Journal', style: TextStyle(color: Colors.black)),
         actions: [
           IconButton(
             icon: Icon(
               _showFavoritesOnly ? Icons.favorite : Icons.favorite_border,
+              color: Colors.black,
             ),
             onPressed: () {
               setState(() {
@@ -55,12 +61,14 @@ class _JournalScreenState extends State<JournalScreen> {
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
+              style: const TextStyle(color: Colors.black),
               decoration: InputDecoration(
                 hintText: 'Search journal...',
-                prefixIcon: const Icon(Icons.search),
+                hintStyle: const TextStyle(color: Colors.black54),
+                prefixIcon: const Icon(Icons.search, color: Colors.black54),
                 suffixIcon: _searchQuery.isNotEmpty
                     ? IconButton(
-                        icon: const Icon(Icons.clear),
+                        icon: const Icon(Icons.clear, color: Colors.black54),
                         onPressed: () {
                           setState(() {
                             _searchQuery = '';
@@ -72,7 +80,7 @@ class _JournalScreenState extends State<JournalScreen> {
                   borderRadius: BorderRadius.circular(30),
                 ),
                 filled: true,
-                fillColor: Theme.of(context).colorScheme.surface,
+                fillColor: Colors.grey[300],
               ),
               onChanged: (value) {
                 setState(() {
@@ -150,9 +158,11 @@ class _JournalScreenState extends State<JournalScreen> {
               const SizedBox(height: 32),
               ElevatedButton.icon(
                 onPressed: () => _newEntry(context, journalService, moodService),
-                icon: const Icon(Icons.edit),
-                label: const Text('Write Your First Entry'),
+                icon: const Icon(Icons.edit, color: Colors.black),
+                label: const Text('Write Your First Entry', style: TextStyle(color: Colors.black)),
                 style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey[300],
+                  foregroundColor: Colors.black,
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24,
                     vertical: 16,
@@ -172,6 +182,7 @@ class _JournalScreenState extends State<JournalScreen> {
     JournalService journalService,
   ) {
     return Card(
+      color: Colors.grey[100],
       margin: const EdgeInsets.only(bottom: 12),
       child: InkWell(
         onTap: () => _viewEntry(context, entry, journalService),
@@ -188,6 +199,7 @@ class _JournalScreenState extends State<JournalScreen> {
                       entry.title,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.bold,
+                            color: Colors.black,
                           ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -196,7 +208,7 @@ class _JournalScreenState extends State<JournalScreen> {
                   IconButton(
                     icon: Icon(
                       entry.isFavorite ? Icons.favorite : Icons.favorite_border,
-                      color: entry.isFavorite ? Colors.red : null,
+                      color: entry.isFavorite ? Colors.red : Colors.black87,
                     ),
                     onPressed: () {
                       journalService.toggleFavorite(entry);
@@ -207,7 +219,9 @@ class _JournalScreenState extends State<JournalScreen> {
               const SizedBox(height: 8),
               Text(
                 entry.content,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.black87,
+                    ),
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
               ),

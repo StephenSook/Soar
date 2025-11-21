@@ -18,6 +18,7 @@ import 'screens/splash_screen.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/home/home_screen.dart';
 import 'screens/onboarding/onboarding_screen.dart';
+import 'screens/onboarding/personalization_screen.dart';
 import 'utils/theme.dart';
 
 // Background task callback
@@ -72,6 +73,7 @@ class SoarApp extends StatelessWidget {
         routes: {
           '/login': (context) => const LoginScreen(),
           '/onboarding': (context) => const OnboardingScreen(),
+          '/personalization': (context) => const PersonalizationScreen(),
           '/home': (context) => const HomeScreen(),
         },
       ),

@@ -90,28 +90,27 @@ exports.generatePodcast = functions.https.onCall(async (data, context) => {
     const [response] = await ttsClient.synthesizeSpeech(request);
     const audioContent = response.audioContent;
 
-    // Upload to Cloud Storage
-    const bucket = storage.bucket(`${admin.instanceId().app.options.projectId}.appspot.com`);
+    // Upload to Cloud Storage - use default bucket
+    const bucket = admin.storage().bucket();
     const fileName = `podcasts/${userId}/${uuidv4()}.mp3`;
     const file = bucket.file(fileName);
 
     await file.save(audioContent, {
       metadata: {
         contentType: 'audio/mpeg',
+        cacheControl: 'public, max-age=31536000',
         metadata: {
           userId,
           createdAt: new Date().toISOString(),
         },
       },
+      public: true,
     });
 
-    // Make file publicly accessible
-    await file.makePublic();
+    // Get the public download URL with proper CORS headers
+    const publicUrl = `https://firebasestorage.googleapis.com/v0/b/${bucket.name}/o/${encodeURIComponent(fileName)}?alt=media`;
 
-    // Get public URL
-    const audioUrl = `https://storage.googleapis.com/${bucket.name}/${fileName}`;
-
-    return {audioUrl};
+    return {audioUrl: publicUrl};
   } catch (error) {
     console.error('Error generating podcast:', error);
     throw new functions.https.HttpsError(
@@ -217,7 +216,7 @@ exports.cleanupOldPodcasts = functions.pubsub
     .schedule('every day 02:00')
     .timeZone('UTC')
     .onRun(async (context) => {
-      const bucket = storage.bucket(`${admin.instanceId().app.options.projectId}.appspot.com`);
+      const bucket = admin.storage().bucket();
       const [files] = await bucket.getFiles({prefix: 'podcasts/'});
 
       const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000);

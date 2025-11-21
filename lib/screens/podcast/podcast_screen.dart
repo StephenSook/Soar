@@ -56,7 +56,9 @@ class _PodcastScreenState extends State<PodcastScreen> {
     final podcastService = context.watch<PodcastService>();
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
         title: const Text('Daily Podcast'),
         actions: [
           IconButton(

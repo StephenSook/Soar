@@ -46,8 +46,13 @@ class _BreathingScreenState extends State<BreathingScreen> with SingleTickerProv
 
   Widget _buildTechniqueListScreen() {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Breathing Exercises'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
+        title: const Text('Breathing Exercises', style: TextStyle(color: Colors.black)),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
@@ -56,6 +61,7 @@ class _BreathingScreenState extends State<BreathingScreen> with SingleTickerProv
             'Breathe Better, Feel Better',
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                   fontWeight: FontWeight.bold,
+                  color: Colors.black,
                 ),
           ),
           const SizedBox(height: 8),
@@ -76,6 +82,7 @@ class _BreathingScreenState extends State<BreathingScreen> with SingleTickerProv
 
   Widget _buildTechniqueCard(BreathingTechnique technique) {
     return Card(
+      color: Colors.grey[100],
       margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         onTap: () {
@@ -113,6 +120,7 @@ class _BreathingScreenState extends State<BreathingScreen> with SingleTickerProv
                           technique.name,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                                 fontWeight: FontWeight.bold,
+                                color: Colors.black,
                               ),
                         ),
                         const SizedBox(height: 4),
@@ -129,13 +137,15 @@ class _BreathingScreenState extends State<BreathingScreen> with SingleTickerProv
                       ],
                     ),
                   ),
-                  const Icon(Icons.arrow_forward_ios, size: 16),
+                  const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.black),
                 ],
               ),
               const SizedBox(height: 12),
               Text(
                 technique.description,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.black87,
+                    ),
               ),
               const SizedBox(height: 8),
               Container(
@@ -161,16 +171,21 @@ class _BreathingScreenState extends State<BreathingScreen> with SingleTickerProv
 
   Widget _buildTechniqueDetailScreen(BreathingTechnique technique) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
             setState(() {
               _selectedTechnique = null;
             });
           },
         ),
-        title: Text(technique.name),
+        title: Text(technique.name, style: const TextStyle(color: Colors.black)),
       ),
       body: Column(
         children: [
@@ -189,6 +204,7 @@ class _BreathingScreenState extends State<BreathingScreen> with SingleTickerProv
                     technique.name,
                     style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                           fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
                     textAlign: TextAlign.center,
                   ),
@@ -201,13 +217,17 @@ class _BreathingScreenState extends State<BreathingScreen> with SingleTickerProv
                     ),
                     child: Text(
                       technique.benefit,
-                      style: Theme.of(context).textTheme.titleSmall,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: Colors.black87,
+                          ),
                     ),
                   ),
                   const SizedBox(height: 24),
                   Text(
                     technique.description,
-                    style: Theme.of(context).textTheme.bodyLarge,
+                    style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          color: Colors.black87,
+                        ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
@@ -244,6 +264,7 @@ class _BreathingScreenState extends State<BreathingScreen> with SingleTickerProv
 
   Widget _buildPhasePreview(BreathingTechnique technique) {
     return Card(
+      color: Colors.grey[100],
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -253,10 +274,14 @@ class _BreathingScreenState extends State<BreathingScreen> with SingleTickerProv
               'How it works',
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
             ),
             const SizedBox(height: 12),
-            Text('${technique.cycles} cycles of:'),
+            Text(
+              '${technique.cycles} cycles of:',
+              style: const TextStyle(color: Colors.black87),
+            ),
             const SizedBox(height: 8),
             ...technique.phases.map((phase) {
               return Padding(
@@ -272,7 +297,9 @@ class _BreathingScreenState extends State<BreathingScreen> with SingleTickerProv
                     Expanded(
                       child: Text(
                         '${phase.instruction} (${phase.duration}s)',
-                        style: Theme.of(context).textTheme.bodyMedium,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Colors.black87,
+                            ),
                       ),
                     ),
                   ],
@@ -299,12 +326,17 @@ class _BreathingScreenState extends State<BreathingScreen> with SingleTickerProv
     }
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.black),
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: const Icon(Icons.close, color: Colors.black),
           onPressed: () => _confirmExit(service),
         ),
-        title: Text(technique.name),
+        title: Text(technique.name, style: const TextStyle(color: Colors.black)),
       ),
       body: Center(
         child: Column(
@@ -348,6 +380,7 @@ class _BreathingScreenState extends State<BreathingScreen> with SingleTickerProv
               phase.instruction,
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.bold,
+                    color: Colors.black,
                   ),
               textAlign: TextAlign.center,
             ),
